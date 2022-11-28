@@ -14,5 +14,7 @@ header {
 }
 
 canvas {
-    width: 50%;
+    border: 1px solid white;
+    max-width: 100%;
+    object-fit: contain;
 }
