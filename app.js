@@ -45,32 +45,44 @@ function draw() {
             addNextImageBtn(img, getRandomImgNum());
             addShowBtn();
 
+            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
             function animate() {
                 requestAnimationFrame(animate);
-                if (show) ctx.drawImage(img, centerX, centerY, scaledImgW, scaledImgH);
-                // setTimeout(() => { pixelationFactor -= 2; console.log('yes') }, 2000);
-            }
-            animate();
-
-
-            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            ctx.imageSmoothingEnabled = false;
-            if (!show) {
-                // Draw the pixelized image
-                for (let y = 0; y < canvas.height; y += pixelationFactor) {
-                    for (let x = 0; x < canvas.width; x += pixelationFactor) {
-                        // extract the position of the sample pixel
-                        const pixelPos = (x + y * canvas.width) * 4;
-                        ctx.fillStyle = `rgba(
+                if (show) {
+                    ctx.drawImage(img, centerX, centerY, scaledImgW, scaledImgH);
+                    cancelAnimationFrame(animate);
+                } else {
+                    // Draw the pixelized image
+                    ctx.imageSmoothingEnabled = false;
+                    for (let y = 0; y < canvas.height; y += pixelationFactor) {
+                        for (let x = 0; x < canvas.width; x += pixelationFactor) {
+                            // extract the position of the sample pixel
+                            const pixelPos = (x + y * canvas.width) * 4;
+                            ctx.fillStyle = `rgba(
                           ${imgData[pixelPos]},
                           ${imgData[pixelPos + 1]},
                           ${imgData[pixelPos + 2]},
                           ${imgData[pixelPos + 3]}
                         )`;
-                        ctx.fillRect(x, y, pixelationFactor, pixelationFactor);
+                            ctx.fillRect(x, y, pixelationFactor, pixelationFactor);
+                        }
                     }
                 }
+                // setTimeout(() => { pixelationFactor -= 2; console.log('yes') }, 2000);
             }
+            animate();
+
+            // Update pixelation based on a timer
+            // let pixelChange;
+            // if (pixelationFactor >= 4) {
+            //     if (!pixelChange) {
+            //         pixelChange = setInterval(() => { pixelationFactor -= 4 }, 800);
+            //     }
+            // }
+            // else {
+            //     clearInterval(pixelChange);
+            //     show = true;
+            // }
         };
         // Randomize picture on refresh
         img.src = `static/img/${getRandomImgNum()}.jpg`;
@@ -97,6 +109,7 @@ function addShowBtn() {
     const showBtn = document.querySelector("#btn-show");
     showBtn.addEventListener("click", ev => {
         show = !show;
+        showBtn.textContent = show ? 'Hide' : 'Show';
     });
 }
 
