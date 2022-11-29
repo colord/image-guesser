@@ -1,8 +1,11 @@
+var show = false;
+
 function draw() {
     const canvas = document.querySelector('#image-display');
-    const canvasW = 1000;
-    const canvasH = 1000;
-    const numOfImages = 5;
+    const canvasW = 900;
+    const canvasH = 900;
+    const numOfImages = 7;
+    let pixelationFactor = 80;
 
     // TODO - Pick random image with no repeats!
     const getRandomImgNum = () => {
@@ -14,10 +17,6 @@ function draw() {
         const img = new Image();
 
         img.onload = () => {
-            /*
-            TODO - Get the average pixel's rgba based on each1 2x2 subsection of the canvas
-            TODO - Display modified image based on updated pixel array
-            */
             // Scale image to the size of the canvas
             let scaledImgW, scaledImgH;
 
@@ -43,19 +42,35 @@ function draw() {
             ctx.drawImage(img, centerX, centerY, scaledImgW, scaledImgH);
 
             setBackground(img);
-            goToNextImage(img, getRandomImgNum());
+            addNextImageBtn(img, getRandomImgNum());
+            addShowBtn();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (show) ctx.drawImage(img, centerX, centerY, scaledImgW, scaledImgH);
+                // setTimeout(() => { pixelationFactor -= 2; console.log('yes') }, 2000);
+            }
+            animate();
 
 
-            // Iterate through pixel array, count pixels
-            // const averageColor = {
-            //     red: 0,
-            //     green: 0,
-            //     blue: 0,
-            //     alpha: 0
-            // };
-            // const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            // for (let i = 0; i < imgData.data.length; i++) {
-            // }
+            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            ctx.imageSmoothingEnabled = false;
+            if (!show) {
+                // Draw the pixelized image
+                for (let y = 0; y < canvas.height; y += pixelationFactor) {
+                    for (let x = 0; x < canvas.width; x += pixelationFactor) {
+                        // extract the position of the sample pixel
+                        const pixelPos = (x + y * canvas.width) * 4;
+                        ctx.fillStyle = `rgba(
+                          ${imgData[pixelPos]},
+                          ${imgData[pixelPos + 1]},
+                          ${imgData[pixelPos + 2]},
+                          ${imgData[pixelPos + 3]}
+                        )`;
+                        ctx.fillRect(x, y, pixelationFactor, pixelationFactor);
+                    }
+                }
+            }
         };
         // Randomize picture on refresh
         img.src = `static/img/${getRandomImgNum()}.jpg`;
@@ -71,11 +86,17 @@ function setBackground(img) {
 TODO - The next button can't be clicked too fast. Something to do with changing the img.src??
      - Improve the speed of next image loading
 */
-function goToNextImage(img, randomImgNum) {
+function addNextImageBtn(img, randomImgNum) {
     const nextImageBtn = document.querySelector("#btn-next-image");
     nextImageBtn.addEventListener("click", ev => {
-        console.log('next');
         img.src = `static/img/${randomImgNum}.jpg`;
+    });
+}
+
+function addShowBtn() {
+    const showBtn = document.querySelector("#btn-show");
+    showBtn.addEventListener("click", ev => {
+        show = !show;
     });
 }
 
